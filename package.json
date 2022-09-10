@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "watch": "tsc -watch",
+    "dev": "nodemon dist/index.js",
+    "start": "node dist/index.js",
+    "start2": "ts-node src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -19,8 +22,16 @@
   "homepage": "https://github.com/BavKudhail/social-network-full-stack#readme",
   "devDependencies": {
     "@types/node": "^18.7.16",
+    "nodemon": "^2.0.19",
     "ts-node": "^10.9.1",
     "tsconfig.json": "^1.0.11",
     "typescript": "^4.8.3"
+  },
+  "dependencies": {
+    "@mikro-orm/cli": "^5.4.1",
+    "@mikro-orm/core": "^5.4.1",
+    "@mikro-orm/migrations": "^5.4.1",
+    "@mikro-orm/postgresql": "^5.4.1",
+    "pg": "^8.8.0"
   }
 }
