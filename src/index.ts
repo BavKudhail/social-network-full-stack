@@ -2,21 +2,21 @@ import { MikroORM, RequestContext } from '@mikro-orm/core';
 import { __prod__ } from './constants';
 import { Post } from './entities/Post';
 import microConfig from './mikro-orm.config';
+import express from 'express';
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
   orm.getMigrator().up();
 
-  //   create fork
-  const emFork = orm.em.fork();
+  const app = express();
 
-  //   const post = emFork.create(Post, {
-  //     title: 'my first post',
-  //   });
-  //   await orm.em.persistAndFlush(post);
+  app.get('/', (_, res) => {
+    res.send('hello');
+  });
 
-  const posts = await emFork.find(Post, {});
-  console.log(posts);
+  app.listen(4000, () => {
+    console.log('server running on localhost:4000');
+  });
 };
 
 main();
