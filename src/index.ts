@@ -19,6 +19,8 @@ const main = async () => {
   });
   //   insert posts
   await orm.em.persistAndFlush(post);
+  //
+  await orm.em.nativeInsert(Post, { title: 'my first post 2' });
 };
 
 main();
