@@ -20,6 +20,14 @@ const main = async () => {
     }),
   });
 
+  // added this line
+  await apolloServer.start();
+
+  //   create a graphql end-point an express
+  apolloServer.applyMiddleware({
+    app,
+  });
+
   app.get('/', (_, res) => {
     res.send('hello');
   });

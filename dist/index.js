@@ -28,6 +28,10 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             validate: false,
         }),
     });
+    yield apolloServer.start();
+    apolloServer.applyMiddleware({
+        app,
+    });
     app.get('/', (_, res) => {
         res.send('hello');
     });
