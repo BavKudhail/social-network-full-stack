@@ -2,6 +2,7 @@ import { __prod__ } from './constants';
 import { Post } from './entities/Post';
 import { Options } from '@mikro-orm/core';
 import path from 'path';
+import { User } from './entities/User';
 
 const config: Options = {
   migrations: {
@@ -9,7 +10,7 @@ const config: Options = {
     glob: '!(*.d).{js,ts}',
   },
 
-  entities: [Post],
+  entities: [Post, User],
   dbName: 'redditDB',
   user: 'postgres',
   password: '19.january',
