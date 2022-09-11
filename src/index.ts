@@ -24,7 +24,6 @@ const main = async () => {
       validate: false,
     }),
 
-    // context is an object shared by all resolvers
     context: () => ({ em: orm.em }),
   });
 
