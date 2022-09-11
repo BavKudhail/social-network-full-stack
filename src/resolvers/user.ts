@@ -10,6 +10,7 @@ import {
   Field,
   Ctx,
   ObjectType,
+  Query,
 } from 'type-graphql';
 
 @InputType()
@@ -39,11 +40,40 @@ class UserResponse {
 // SAVE USER TO DATABASE
 @Resolver()
 export class UserResolver {
-  @Mutation(() => User)
+  // GET ALL USERS
+
+  @Query(() => [User])
+  getAllUsers(@Ctx() { em }: MyContext): Promise<User[]> {
+    return em.find(User, {});
+  }
+
+  @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() { em }: MyContext
-  ) {
+  ): Promise<UserResponse> {
+    // username
+    if (options.username.length <= 2) {
+      return {
+        errors: [
+          {
+            field: 'username',
+            message: 'length must be greater than 2',
+          },
+        ],
+      };
+    }
+    // password
+    if (options.password.length <= 3) {
+      return {
+        errors: [
+          {
+            field: 'password',
+            message: 'length must be greater than 3',
+          },
+        ],
+      };
+    }
     // hash password
     const hashedPassword = await argon2.hash(options.password);
     const user = em.create(User, {
@@ -51,7 +81,9 @@ export class UserResolver {
       password: hashedPassword,
     });
     await em.persistAndFlush(user);
-    return user;
+    return {
+      user,
+    };
   }
 
   @Mutation(() => UserResponse)
@@ -77,6 +109,7 @@ export class UserResolver {
     const valid = await argon2.verify(user.password, options.password);
 
     // if password is not valid, return errors
+    // TODO - RETURN MESSAGE TO FRONT-END
     if (!valid) {
       return {
         errors: [
