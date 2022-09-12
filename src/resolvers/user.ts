@@ -25,6 +25,7 @@ class UsernamePasswordInput {
 class FieldError {
   @Field()
   field: string;
+  @Field()
   message: string;
 }
 
@@ -38,10 +39,9 @@ class UserResponse {
 }
 
 // SAVE USER TO DATABASE
-@Resolver()
+@Resolver(User)
 export class UserResolver {
   // GET ALL USERS
-
   @Query(() => [User])
   getAllUsers(@Ctx() { em }: MyContext): Promise<User[]> {
     return em.find(User, {});
@@ -80,7 +80,21 @@ export class UserResolver {
       username: options.username,
       password: hashedPassword,
     });
-    await em.persistAndFlush(user);
+    try {
+      await em.persistAndFlush(user);
+    } catch (error) {
+      if (error.code === '23505' || error.detail.includes('23505')) {
+        return {
+          errors: [
+            {
+              field: 'username',
+              message: 'the username has already been taken',
+            },
+          ],
+        };
+      }
+    }
+
     return {
       user,
     };
@@ -89,7 +103,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async login(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOneOrFail(User, {
       username: options.username,
@@ -109,7 +123,6 @@ export class UserResolver {
     const valid = await argon2.verify(user.password, options.password);
 
     // if password is not valid, return errors
-    // TODO - RETURN MESSAGE TO FRONT-END
     if (!valid) {
       return {
         errors: [
@@ -121,10 +134,16 @@ export class UserResolver {
       };
     }
 
-    console.log('USER:', user);
-    // return user
+    // storing userId inside the session
+    req.session.user = user.id;
+
+    console.log('USER ID: ', req.session.user);
+
+    // return useraa
     return {
       user,
     };
   }
+
+  //   STORING COOKIES IN THE USERS BROWSER
 }

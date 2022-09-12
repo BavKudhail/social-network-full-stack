@@ -47,6 +47,10 @@ __decorate([
     (0, type_graphql_1.Field)(),
     __metadata("design:type", String)
 ], FieldError.prototype, "field", void 0);
+__decorate([
+    (0, type_graphql_1.Field)(),
+    __metadata("design:type", String)
+], FieldError.prototype, "message", void 0);
 FieldError = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], FieldError);
@@ -94,13 +98,27 @@ let UserResolver = class UserResolver {
                 username: options.username,
                 password: hashedPassword,
             });
-            yield em.persistAndFlush(user);
+            try {
+                yield em.persistAndFlush(user);
+            }
+            catch (error) {
+                if (error.code === '23505' || error.detail.includes('23505')) {
+                    return {
+                        errors: [
+                            {
+                                field: 'username',
+                                message: 'the username has already been taken',
+                            },
+                        ],
+                    };
+                }
+            }
             return {
                 user,
             };
         });
     }
-    login(options, { em }) {
+    login(options, { em, req }) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield em.findOneOrFail(User_1.User, {
                 username: options.username,
@@ -126,7 +144,8 @@ let UserResolver = class UserResolver {
                     ],
                 };
             }
-            console.log('USER:', user);
+            req.session.user = user.id;
+            console.log('USER ID: ', req.session.user);
             return {
                 user,
             };
@@ -157,7 +176,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "login", null);
 UserResolver = __decorate([
-    (0, type_graphql_1.Resolver)()
+    (0, type_graphql_1.Resolver)(User_1.User)
 ], UserResolver);
 exports.UserResolver = UserResolver;
 //# sourceMappingURL=user.js.map
